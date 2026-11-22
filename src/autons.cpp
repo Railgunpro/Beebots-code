@@ -377,14 +377,18 @@ void measure_offsets() {
 // Make your own autonomous functions here!
 // . . .
 void auton() {
-  chassis.pid_targets_reset();                // Resets PID targets to 0   // Set the current position, you can start at a specific position with this
-  chassis.drive_brake_set(MOTOR_BRAKE_HOLD);  // Set motors to hold.  This helps autonomous consistency
+  // --- Setup ---
+  chassis.pid_targets_reset();                // Zero out PID targets before starting a fresh motion
+  chassis.drive_brake_set(MOTOR_BRAKE_HOLD);   // Hold position when stopped, for repeatable stops between moves
 
-  clar.set_value(true);
+  // --- Grab first mobile goal and tilt lift back ---
+  clar.set_value(true);                        // Close clamp onto the mobile goal
   pros::delay(200);
-  lift1.move_relative(-2*360, 100);
+  lift1.move_relative(-2*360, 100);             // Tilt lift arms back 2 full rotations (clearing the goal off the ground)
   lift2.move_relative(-2*360, 100);
   pros::delay(600);
+
+  // --- Wiggle maneuver (likely to free the goal from a stack or wall) ---
   chassis.pid_drive_set(-5_in, 127);
   pros::delay(300);
   chassis.pid_drive_set(4_in, 127);
@@ -395,33 +399,45 @@ void auton() {
   pros::delay(300);
   chassis.pid_drive_set(-10_in, 127);
   pros::delay(300);
+
+  // --- Drive to first scoring location ---
   chassis.pid_drive_set(18_in, 127);
   pros::delay(370);
-  chassis.pid_turn_set(90_deg, 90);
+  chassis.pid_turn_set(90_deg, 90);             // Turn to face the scoring zone (absolute heading, not relative)
   pros::delay(500);
-  chassis.pid_drive_set(35_in, 90);
+  chassis.pid_drive_set(35_in, 90);             // Slower approach speed for accuracy on the final approach
   pros::delay(1000);
-  lift1.move_relative(2*360, 50);
+
+  // --- Score: raise lift, release goal ---
+  lift1.move_relative(2*360, 50);               // Tilt lift back forward/up to place the goal
   lift2.move_relative(2*360, 50);
   pros::delay(300);
-  clar.set_value(false);
+  clar.set_value(false);                     // Open clamp, releasing the goal
   pros::delay(300);
+
+  // --- Back off and reposition for second goal ---
   chassis.pid_drive_set(-20_in, 127);
   pros::delay(400);
   chassis.pid_turn_set(43_deg, 90);
   pros::delay(500);
   chassis.pid_drive_set(26_in, 90);
   pros::delay(800);
-  clar.set_value(true);
+
+  // --- Grab second mobile goal ---
+  clar.set_value(true);                       // Close clamp onto second goal
   pros::delay(500);
-  lift1.move_relative(-4*360, 100);
+  lift1.move_relative(-4*360, 100);          // Larger tilt (4 rotations) — possibly a taller stack or further 
   lift2.move_relative(-4*360, 100);
   pros::delay(300);
+
+  // --- Drive to second scoring location ---
   chassis.pid_drive_set(-34_in, 127);
   pros::delay(400);
   chassis.pid_turn_set(90_deg, 90);
   pros::delay(500);
   chassis.pid_drive_set(30_in, 127);
+
+  // --- Score second goal ---
   lift1.move_relative(2*360, 50);
   lift2.move_relative(2*360, 50);
   pros::delay(200);
