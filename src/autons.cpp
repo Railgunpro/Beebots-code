@@ -439,7 +439,7 @@ void auton() {
 
   // --- Score second goal ---
   lift1.move_relative(2*360, 50);
-  lift2.move_relative(2*360, 50);
+  lift2.move_relative(2*360, 50);            // Tilt lift downward to place the second goal
   pros::delay(200);
   clar.set_value(false);
   pros::delay(300);
